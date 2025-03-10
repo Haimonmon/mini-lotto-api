@@ -13,9 +13,12 @@ class PotController {
     async getPot(req, res) {
         try {
             const amount = await this.pot.getPotAmount();
+            console.log(amount);
             res.send({
                 success: true,
-                data: { potAmount: amount }
+                data: { 
+                    amount
+                 }
             });
         } catch (err) {
             res.send({

@@ -6,7 +6,7 @@ class Bet {
     }
 
     async getLatestRoundId() {
-        const [rows] = await connection.execute("SELECT MAX(round_id) AS round_id FROM game_round");
+        const [rows] = await connection.execute("SELECT MAX(round_id) AS round_id FROM game_rounds");
         return rows[0].round_id || 1; // Default to 1 if no rounds exist
     }
 

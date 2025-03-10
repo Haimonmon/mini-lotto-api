@@ -10,7 +10,7 @@ class Pot {
             const [result] = await this.db.execute(
                 "SELECT pot_amount FROM pot_money"
             );
-            return result || 0;
+            return result?.[0] || 0;
         } catch (err) {
             console.error("<error> pot.getPotAmount", err);
             throw err;

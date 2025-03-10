@@ -42,7 +42,7 @@ class DrawResult {
             const safePotId = currentPotId ?? null;
     
             // ✅ Insert draw result
-            const [result] = await this.db.execute(
+            const result = await this.db.execute(
                 'INSERT INTO draw_result (winning_no, created_at, user_id, pot_id, bet_id) VALUES (?, NOW(), ?, ?, ?)',
                 [winningNumbersStr, safeWinningUserId, safePotId, safeWinningBetId]
             );
