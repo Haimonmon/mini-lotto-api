@@ -5,6 +5,15 @@ class Bet {
         this.db = connection;
     }
 
+    async getLatestRoundId() {
+        const [rows] = await connection.execute("SELECT MAX(round_id) AS round_id FROM game_round");
+        return rows[0].round_id || 1; // Default to 1 if no rounds exist
+    }
+
+    // ✅ Increment round_id (Start a new round)
+    async incrementRoundId() {
+        await connection.execute("INSERT INTO game_round (round_id) VALUES (NULL)");
+    }
     /**
      * Place a new bet
      * @param {number} user_id - The ID of the user placing the bet
