@@ -159,6 +159,41 @@ class AccountController{
         }
     }
 
+    async getBetHistory(req, res){
+        try{
+            const userId = res.locals.user_id;
+            const result = await this.user.getHistory(userId);
+            res.send({
+                success: true,
+                data: {
+                    result
+                }
+            })
+        } catch (err){
+            res.send({
+                success: false,
+                message: err.toString()
+            })
+        }
+    }
+
+    async getLastWinHistoria(req, res){
+        try{
+            const userId = res.locals.user_id;
+            const result = await this.user.getLastWinHistory(userId);
+            res.send({
+                success: true,
+                data: {
+                    result
+                }
+            })
+        } catch (err){
+            res.send({
+                success: false,
+                message: err.toString()
+            })
+        }
+    }
 }
 
 export default AccountController;

@@ -115,6 +115,56 @@ class User{
             throw err;
         }
     }
+
+    async getHistory(user_id){
+        try{
+            const [result,] = await connection.execute(
+                `SELECT 
+                    b.bet_id, 
+                    b.user_id, 
+                    b.round_id, 
+                    b.bet_amount, 
+                    b.bet_number, 
+                    b.created_at, 
+                    CASE 
+                        WHEN d.bet_id IS NOT NULL THEN 'Won'
+                        ELSE 'Lost'
+                    END AS status
+                FROM bet AS b
+                LEFT JOIN draw_result AS d ON b.bet_id = d.bet_id
+                WHERE b.user_id = ? 
+                ORDER BY b.created_at DESC;`,
+                [user_id],
+            )
+            return result;
+        } catch (err){
+            console.error('<error> user.getHistory', err)
+            throw err;
+        }
+    }
+
+    async getLastWinHistory(user_id){
+        try{
+            const [result,] = await connection.execute(
+                `SELECT 
+                    b.bet_id, 
+                    b.user_id, 
+                    b.bet_amount, 
+                    b.bet_number, 
+                    d.winning_no, 
+                    d.created_at AS win_date
+                FROM bet AS b
+                JOIN draw_result AS d ON b.bet_id = d.bet_id
+                WHERE b.user_id = ?
+                ORDER BY d.created_at DESC
+                LIMIT 1;`,
+                [user_id]
+            )
+        } catch (err){
+            console.error('<error> user.getLastWinHistory', err);
+            throw err;
+        }
+    }
 }
 
 export default User;

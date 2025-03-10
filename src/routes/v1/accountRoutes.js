@@ -45,4 +45,18 @@ accountRouter.patch('/', authentication, account.updatePassword.bind(account));
  */
 accountRouter.patch('/topup', authentication, account.addMoney.bind(account));
 
+/**
+ * bet history
+ * @method get
+ * path /v1/account/history
+ */
+accountRouter.get('/history', authentication, account.getBetHistory.bind(account));
+
+/**
+ * last-win-history
+ * @method GET
+ * path /v1/account/win-history
+ */
+accountRouter.get('/lastwin', authentication, account.getLastWinHistoria.bind(account));
+
 export default accountRouter;
