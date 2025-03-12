@@ -18,6 +18,7 @@ class DrawResultController {
     async createDraw(req, res) {
         try {
             const winningNumbers = this.generateWinningNumbers();
+            const winningNumber = '14-15-16-17-19-20'
             const response = await this.drawResult.storeDrawResult(winningNumbers);
             console.log(response)
 

@@ -30,11 +30,9 @@ class BetController {
         }
     
         try {
-            // ✅ Get the latest round_id
-            const round_id = await this.bet.getLatestRoundId();
     
             // ✅ Place the bet with the latest round_id
-            const result = await this.bet.placeBet(user_id, bet_amount, bet_number, round_id);
+            const result = await this.bet.placeBet(user_id, bet_amount, bet_number);
     
             // ✅ Immediately add bet amount to the pot
             await this.pot.updatesPot(bet_amount);
@@ -42,8 +40,7 @@ class BetController {
             res.send({ 
                 success: true, 
                 message: "Bet placed successfully", 
-                bet_id: result.insertId, 
-                round_id 
+                bet_id: result.insertId 
             });
         } catch (err) {
             res.send({ 

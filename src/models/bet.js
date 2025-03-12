@@ -5,15 +5,20 @@ class Bet {
         this.db = connection;
     }
 
-    async getLatestRoundId() {
-        const [rows] = await connection.execute("SELECT MAX(round_id) AS round_id FROM game_rounds");
-        return rows[0].round_id || 1; // Default to 1 if no rounds exist
+    async createNewRound(){
+        try{
+            const [result] = await connection.execute("INSERT INTO game_rounds (created_at) VALUES (NOW())");
+            return result.insertId;
+        } catch(err){
+
+        }
     }
 
-    // ✅ Increment round_id (Start a new round)
-    async incrementRoundId() {
-        await connection.execute("INSERT INTO game_round (round_id) VALUES (NULL)");
+    async getLatestRoundId() {
+        const [round] = await connection.execute("SELECT * FROM game_rounds ORDER BY created_at DESC LIMIT 1");
+        return round.length ? round[0].round_id : await this.createNewRound();
     }
+
     /**
      * Place a new bet
      * @param {number} user_id - The ID of the user placing the bet
@@ -21,12 +26,14 @@ class Bet {
      * @param {string} bet_number - The numbers the user is betting on (formatted as "XX-XX-XX-XX-XX-XX")
      * @param {number} round_id - The ID of the current round
      */
-    async placeBet(user_id, bet_amount, bet_number, round_id) {
+    async placeBet(user_id, bet_amount, bet_number) {
         try {
+            const currentRoundId = await this.getLatestRoundId();
+            console.log(currentRoundId)
             // Ensure the user does not exceed 20 bets per round
             const [betCount] = await this.db.execute(
                 "SELECT COUNT(*) as count FROM bet WHERE user_id = ? AND round_id = ?", 
-                [user_id, round_id]
+                [user_id, currentRoundId]
             );
             
             if (betCount[0].count >= 20) {
@@ -36,8 +43,9 @@ class Bet {
             // Insert new bet with round_id
             const [result] = await this.db.execute(
                 "INSERT INTO bet (user_id, bet_amount, bet_number, round_id, created_at) VALUES (?, ?, ?, ?, NOW())", 
-                [user_id, bet_amount, bet_number, round_id]
+                [user_id, bet_amount, bet_number, currentRoundId]
             );
+            console.log(result)
             return result;
         } catch (err) {
             console.error("<error> bet.placeBet", err);
