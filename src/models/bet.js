@@ -1,8 +1,10 @@
 import { connection } from "../core/database.js";
+import Notification from "./notification.js";
 
 class Bet {
     constructor() {
         this.db = connection;
+        this.Notification = new Notification();
     }
 
     async createNewRound(){
@@ -49,6 +51,40 @@ class Bet {
             return result;
         } catch (err) {
             console.error("<error> bet.placeBet", err);
+            throw err;
+        }
+    }
+
+    async checkBalance(user_id){
+        try{
+            // ✅ Check user's current balance
+            const [userData] = await this.db.execute(
+                "SELECT user_money FROM user WHERE user_id = ?",
+                [user_id]
+            );
+
+            return userData;
+        } catch (err){
+            console.error("<error> bet.checkBalance", err);
+            throw err;
+        }
+    }
+
+    async deductMoney(user_id,bet_amount){
+        try{
+            // ✅ Deduct bet amount from user's balance
+            const [result] = await this.db.execute(
+                "UPDATE user SET user_money = user_money - ? WHERE user_id = ?",
+                [bet_amount, user_id]
+            );
+            // ✅ Send wallet deduction notification
+            if (result.affectedRows > 0) {
+                const message = `💸 ₱${bet_amount} has been deducted from your wallet for your bet.`;
+                await this.Notification.addNotification(user_id, "wallet_deduct", message);
+            }
+            return result;
+        } catch (err){
+            console.error("<error> bet.deductMoney", err);
             throw err;
         }
     }

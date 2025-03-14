@@ -1,9 +1,11 @@
 import { connection } from "../core/database.js";
 import { encryptPassword } from '../utils/hash.js';
+import Notification from "./notification.js";
 
 class User{
     constructor(){
         this.user = connection;
+        this.Notification = new Notification();
     }
 
     /**
@@ -106,9 +108,13 @@ class User{
     async topUp(money, userId){
         try{
             const result = await connection.execute(
-                'UPDATE user SET user_money + ? WHERE user_id = ?',
+                'UPDATE user SET user_money = COALESCE(user_money, 0) + ? WHERE user_id = ?',
                 [money,userId],
             );
+            if (result.affectedRows > 0) {
+                const message = `💸 ₱${money} has been added to your wallet.`;
+                await this.Notification.addNotification(userId, "wallet_add", message);
+            }
             return result;
         } catch (err){
             console.error('<error> user.topUp', err)
@@ -127,13 +133,14 @@ class User{
                     b.bet_number, 
                     b.created_at, 
                     CASE 
-                        WHEN d.bet_id IS NOT NULL THEN 'Won'
+                        WHEN w.bet_id IS NOT NULL THEN 'Won'
                         ELSE 'Lost'
                     END AS status
                 FROM bet AS b
-                LEFT JOIN draw_result AS d ON b.bet_id = d.bet_id
+                LEFT JOIN win_result AS w ON b.bet_id = w.bet_id
                 WHERE b.user_id = ? 
-                ORDER BY b.created_at DESC;`,
+                ORDER BY b.created_at DESC;
+`,
                 [user_id],
             )
             return result;
@@ -154,12 +161,14 @@ class User{
                     d.winning_no, 
                     d.created_at AS win_date
                 FROM bet AS b
-                JOIN draw_result AS d ON b.bet_id = d.bet_id
+                JOIN win_result AS w ON b.bet_id = w.bet_id  -- ✅ Join with win_result
+                JOIN draw_result AS d ON w.draw_id = d.draw_id  -- ✅ Connect win_result to draw_result
                 WHERE b.user_id = ?
                 ORDER BY d.created_at DESC
                 LIMIT 1;`,
                 [user_id]
             )
+            return result;
         } catch (err){
             console.error('<error> user.getLastWinHistory', err);
             throw err;

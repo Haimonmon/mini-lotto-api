@@ -20,16 +20,51 @@ class BetController {
             return res.send({ success: false, message: "Invalid bet details" });
         }
     
-        // Validate bet_number format "XX-XX-XX-XX-XX-XX"
-        const betNumberPattern = /^(\d{1,2}-){5}\d{1,2}$/;
-        if (!betNumberPattern.test(bet_number)) {
+        // ✅ Check if bet amount is at least 20
+        if (bet_amount < 20) {
             return res.send({ 
                 success: false, 
-                message: "Invalid bet number format. Use XX-XX-XX-XX-XX-XX" 
+                message: "Minimum bet amount is ₱20" 
+            });
+        }
+    
+        // ✅ Validate bet_number format "XX-XX-XX-XX-XX-XX"
+        const betNumberPattern = /^(\d{1,2}-){5}\d{1,2}$/;
+        if (!betNumberPattern.test(bet_number)) {
+            return res.send({
+                success: false,
+                message: "Invalid bet number format. Use XX-XX-XX-XX-XX-XX"
             });
         }
     
         try {
+            // ✅ Check user's current balance
+            const [userData] = await this.bet.checkBalance(user_id);
+            console.log(userData)
+    
+            if (userData.length === 0) {
+                return res.send({ success: false, message: "User not found" });
+            }
+    
+            const userMoney = userData.user_money || 0; // Ensure NULL is treated as 0
+    
+            // ✅ Prevent placing bet if balance is 0 or less than bet amount
+            if (userMoney === 0) {
+                return res.send({
+                    success: false,
+                    message: "You have no balance. Please deposit to play."
+                });
+            }
+    
+            if (userMoney < bet_amount) {
+                return res.send({
+                    success: false,
+                    message: "Insufficient balance to place this bet."
+                });
+            }
+            
+            // deduct money
+            await this.bet.deductMoney(user_id,bet_amount);
     
             // ✅ Place the bet with the latest round_id
             const result = await this.bet.placeBet(user_id, bet_amount, bet_number);
@@ -37,18 +72,19 @@ class BetController {
             // ✅ Immediately add bet amount to the pot
             await this.pot.updatesPot(bet_amount);
     
-            res.send({ 
-                success: true, 
-                message: "Bet placed successfully", 
-                bet_id: result.insertId 
+            res.send({
+                success: true,
+                message: "Bet placed successfully",
+                bet_id: result.insertId
             });
         } catch (err) {
-            res.send({ 
-                success: false, 
-                message: err.message 
+            res.send({
+                success: false,
+                message: err.toString()
             });
         }
     }
+    
     
 
     /**

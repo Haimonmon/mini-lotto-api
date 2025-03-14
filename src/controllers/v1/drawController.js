@@ -19,10 +19,10 @@ class DrawResultController {
         try {
             const winningNumbers = this.generateWinningNumbers();
             const winningNumber = '14-15-16-17-19-20'
-            const response = await this.drawResult.storeDrawResult(winningNumbers);
+            const response = await this.drawResult.storeDrawResult(winningNumber);
             console.log(response)
 
-            console.log("🎉 Winning Numbers:", winningNumbers);
+            console.log("🎉 Winning Numbers:", winningNumber);
 
             // ✅ Fetch only bets for the current round
             const currentRoundId = await this.bet.getLatestRoundId();
@@ -40,7 +40,7 @@ class DrawResultController {
                 console.log("🎟️ Bet Numbers:", betNumbersArray);
     
                 // ✅ Compare sorted arrays for an exact match
-                if (JSON.stringify(betNumbersArray.sort()) === JSON.stringify(winningNumbers)) {
+                if (JSON.stringify(betNumbersArray.sort()) === JSON.stringify(winningNumber)) {
                     winningUsers.push(bet.user_id);
                 }
             }
