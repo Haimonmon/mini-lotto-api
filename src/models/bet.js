@@ -22,6 +22,29 @@ class Bet {
     }
 
     /**
+     * Get total bet amount of each user who bet in the current round
+     */
+    async getBetsForLatestRound() {
+        try {
+            const round_id = await this.getLatestRoundId();
+            if (!round_id) return [];
+
+            const [bets] = await this.db.execute(
+                `SELECT user.username, bet.bet_amount, bet.bet_id 
+                 FROM bet 
+                 JOIN user ON bet.user_id = user.user_id
+                 WHERE bet.round_id = ?`,
+                [round_id]
+            );
+
+            return bets;
+        } catch (err) {
+            console.error("<error> bet.getBetsForLatestRound", err);
+            throw err;
+        }
+    }
+
+    /**
      * Place a new bet
      * @param {number} user_id - The ID of the user placing the bet
      * @param {number} bet_amount - The amount being bet

@@ -85,6 +85,20 @@ class BetController {
         }
     }
     
+    async getLatestBets(req, res){
+        try {
+            const bets = await this.bet.getBetsForLatestRound();
+            res.send({ 
+                success: true, 
+                bet: bets 
+            });
+        } catch (err) {
+            res.send({ 
+                success: false, 
+                message: err.message 
+            });
+        }
+    }
     
 
     /**

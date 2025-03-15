@@ -22,4 +22,7 @@ betRouter.post("/", authentication, bet.placeBet.bind(bet));
  */
 betRouter.post("/process", authentication, bet.processBets.bind(bet));
 
+
+betRouter.get("/latestBets", authentication, bet.getLatestBets.bind(bet));
+
 export default betRouter;

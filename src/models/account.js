@@ -28,7 +28,7 @@ class User{
 
         const hashPassword = encryptPassword(password)
         const [result,] = await connection.execute(
-            'INSERT INTO user(username, password, user_money) VALUES (?, ?, ?)',
+            'INSERT INTO user(username, password, user_money, created_at) VALUES (?, ?, ?, NOW())',
             [username,hashPassword, userMoney],
         );
         console.log(result)
@@ -63,7 +63,7 @@ class User{
     async getProfile(username){
         try{
             const [result,] = await connection.execute(
-                'SELECT user_id, username, user_money FROM user WHERE username = ?',
+                'SELECT user_id, username, user_money, created_at FROM user WHERE username = ?',
                 [username],
             );
 
