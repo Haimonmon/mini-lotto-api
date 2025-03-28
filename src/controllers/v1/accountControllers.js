@@ -16,7 +16,7 @@ class AccountController{
         const { username, password } = req.body || {}
 
         try{
-            const response = await this.user.createAccount(username, password, null);
+            const response = await this.user.createAccount(username, password, 1000);
     
             res.send({
                 success: true,
