@@ -145,6 +145,34 @@ class Bet {
             throw err;
         }
     }
+
+    async getUserBetsRound(user_id) {
+        try {
+            const [bets] = await this.db.execute(
+                `SELECT b.*, 
+                        CASE 
+                            WHEN b.bet_number = d.winning_no THEN 'win' 
+                            ELSE 'lose' 
+                        END AS status
+                FROM bet b
+                JOIN (
+                    SELECT round_id, winning_no
+                    FROM draw_result 
+                    ORDER BY created_at DESC 
+                    LIMIT 1
+                ) d ON b.round_id = d.round_id
+                WHERE b.user_id = ?
+                ORDER BY b.created_at DESC;`,
+                [user_id]
+            );
+    
+            return bets;
+        } catch (err) {
+            console.error("<error> bet.getUserBetsRound", err);
+            throw err;
+        }
+    }
+    
 }
 
 export default Bet;

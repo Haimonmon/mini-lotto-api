@@ -141,6 +141,19 @@ class BetController {
             res.send({ success: false, message: err.message });
         }
     }
+
+    async getuserbetsround(req, res){
+        try{
+            const userId = res.locals.user_id;
+            const bets = await this.bet.getUserBetsRound(userId); 
+            res.send({
+                success: true,
+                bet: bets
+            })
+        } catch (err){
+
+        }
+    }
     
 }
 
